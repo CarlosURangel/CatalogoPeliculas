@@ -13,17 +13,17 @@ class TestValidaciones(unittest.TestCase):
         with self.assertRaises(ValueError):
             v.validar_titulo("   ")
 
-    def test_anio_ok(self):
-        self.assertEqual(v.validar_anio(config.anio_minimo), config.anio_minimo)
-        self.assertEqual(v.validar_anio(config.anio_maximo), config.anio_maximo)
+    def test_año_ok(self):
+        self.assertEqual(v.validar_año(config.año_minimo), config.año_minimo)
+        self.assertEqual(v.validar_año(config.año_maximo), config.año_maximo)
 
-    def test_anio_tipo(self):
+    def test_año_tipo(self):
         with self.assertRaises(ValueError):
-            v.validar_anio("2000")  # no int
+            v.validar_año("2000")  # no int
 
-    def test_anio_fuera_rango(self):
+    def test_año_fuera_rango(self):
         with self.assertRaises(ValueError):
-            v.validar_anio(config.anio_minimo - 1)
+            v.validar_año(config.año_minimo - 1)
 
     def test_rating_ok(self):
         self.assertEqual(v.validar_rating(5), 5)
@@ -70,7 +70,7 @@ class TestCRUD(unittest.TestCase):
     def test_agregar_y_buscar(self):
         datos = {
             "titulo": "Interstellar",
-            "anio": 2014,
+            "año": 2014,
             "genero": "Ciencia Ficción",
             "rating": 8.6,
             "director": "Christopher Nolan",
@@ -84,7 +84,7 @@ class TestCRUD(unittest.TestCase):
 
     def test_agregar_existente(self):
         # Usa una clave conocida del dataset por defecto
-        ok, msg = db.agregar_pelicula("matrix", {"titulo": "X", "anio": 2000, "genero": "X", "rating": 5, "director": "X", "duracion": 100})
+        ok, msg = db.agregar_pelicula("matrix", {"titulo": "X", "año": 2000, "genero": "X", "rating": 5, "director": "X", "duracion": 100})
         self.assertFalse(ok)
         self.assertIn("ya está registrada", msg)
 
@@ -100,7 +100,7 @@ class TestCRUD(unittest.TestCase):
 
     def test_total(self):
         total_inicial = db.total_peliculas()
-        ok, _ = db.agregar_pelicula("up", {"titulo": "Up", "anio": 2009, "genero": "Animación", "rating": 8.2, "director": "Pete Docter", "duracion": 96})
+        ok, _ = db.agregar_pelicula("up", {"titulo": "Up", "año": 2009, "genero": "Animación", "rating": 8.2, "director": "Pete Docter", "duracion": 96})
         self.assertTrue(ok)
         self.assertEqual(db.total_peliculas(), total_inicial + 1)
 

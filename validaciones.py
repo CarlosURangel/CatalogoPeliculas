@@ -5,12 +5,12 @@ def validar_titulo(titulo):
         raise ValueError(config.mensaje_error["titulo_vacio"])
     return titulo.strip()
 
-def validar_anio(anio):
-    if not isinstance(anio, int):
-        raise ValueError(config.mensaje_error["anio_numero"])
-    if not (config.anio_minimo <= anio <= config.anio_maximo):
-        raise ValueError(config.mensaje_error["anio_rango"])
-    return anio
+def validar_año(año):
+    if not isinstance(año, int):
+        raise ValueError(config.mensaje_error["año_numero"])
+    if not (config.año_minimo <= año <= config.año_maximo):
+        raise ValueError(config.mensaje_error["año_rango"])
+    return año
 
 def validar_rating(rating):
     if not isinstance(rating, (int, float)):

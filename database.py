@@ -1,8 +1,8 @@
-# Base de datos simulada
+# Base de datos
 peliculas_database = {
     "matrix": {
         "titulo": "Matrix",
-        "anio": 1999,
+        "año": 1999,
         "genero": "Ciencia Ficción",
         "rating": 9.0,
         "director": "Lana y Lilly Wachowski",
@@ -10,7 +10,7 @@ peliculas_database = {
     },
     "inception": {
         "titulo": "Inception",
-        "anio": 2010,
+        "año": 2010,
         "genero": "Acción/Ciencia Ficción",
         "rating": 8.8,
         "director": "Christopher Nolan",
@@ -18,7 +18,7 @@ peliculas_database = {
     },
     "parasite": {
         "titulo": "Parasite",
-        "anio": 2019,
+        "año": 2019,
         "genero": "Drama/Thriller",
         "rating": 8.6,
         "director": "Bong Joon-ho",
@@ -26,34 +26,40 @@ peliculas_database = {
     },
 }
 
-# -------- CRUD --------
+# CRUD
+# Agregar pelicula 
 def agregar_pelicula(nombre, datos):
-    clave = nombre.lower()
-    if clave in peliculas_database:
-        return False, "La película ya está registrada."
-    peliculas_database[clave] = datos
-    return True, f" {datos['titulo']} ha sido registrada."
+    pelicula = nombre.lower()
+    if pelicula in peliculas_database:
+        return False, "La película ya está registrada"
+    peliculas_database[pelicula] = datos
+    return True, f" {pelicula} ha sido registrada"
 
+# Eliminar pelicula
 def eliminar_pelicula(nombre):
-    clave = nombre.lower()
-    if clave not in peliculas_database:
+    pelicula = nombre.lower()
+    if pelicula not in peliculas_database:
         return False, "Película no encontrada."
-    titulo = peliculas_database[clave]["titulo"]
-    del peliculas_database[clave]
+    titulo = peliculas_database[pelicula]["titulo"]
+    del peliculas_database[pelicula]
     return True, f"{titulo} ha sido eliminada."
 
+# Buscar pelicula
 def buscar_pelicula(nombre):
     return peliculas_database.get(nombre.lower(), None)
 
+#Listar peliculas
 def obtener_todas_peliculas():
     return sorted(peliculas_database.values(), key=lambda x: x["titulo"])
 
+# Actualizar pelicula
 def actualizar_pelicula(nombre, nuevos_datos):
-    clave = nombre.lower()
-    if clave not in peliculas_database:
-        return False, "Película no encontrada."
-    peliculas_database[clave].update(nuevos_datos)
-    return True, f"Los datos de {peliculas_database[clave]['titulo']} se han actualizado."
+    pelicula = nombre.lower()
+    if pelicula not in peliculas_database:
+        return False, "Película no encontrada"
+    peliculas_database[pelicula].update(nuevos_datos)
+    return True, f"Los datos de {peliculas_database[pelicula]['titulo']} se han actualizado."
+
 
 def existe_pelicula(nombre):
     return nombre.lower() in peliculas_database

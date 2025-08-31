@@ -12,7 +12,6 @@ ACCIONES = {
     "3": interfaz.agregar,
     "4": interfaz.actualizar,
     "5": interfaz.eliminar,
-    "6": interfaz.estadisticas,
 }
 
 def run() -> None:
@@ -20,7 +19,7 @@ def run() -> None:
         interfaz.mostrar_menu()
         opcion = interfaz.pedir_opcion()
         if opcion == "0":
-            print("👋 ¡Hasta luego!")
+            print("Saliendo...")
             break
         accion = ACCIONES.get(opcion)
         if accion:
@@ -32,5 +31,5 @@ if __name__ == "__main__":
     try:
         run()
     except KeyboardInterrupt:
-        print("\nPrograma interrumpido por el usuario.")
+        print("\nSaliendo...")
         sys.exit(0)
