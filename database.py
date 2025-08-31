@@ -30,17 +30,17 @@ peliculas_database = {
 def agregar_pelicula(nombre, datos):
     clave = nombre.lower()
     if clave in peliculas_database:
-        return False, "❌ La película ya está registrada."
+        return False, "La película ya está registrada."
     peliculas_database[clave] = datos
-    return True, f"✅ {datos['titulo']} ha sido registrada."
+    return True, f" {datos['titulo']} ha sido registrada."
 
 def eliminar_pelicula(nombre):
     clave = nombre.lower()
     if clave not in peliculas_database:
-        return False, "❌ Película no encontrada."
+        return False, "Película no encontrada."
     titulo = peliculas_database[clave]["titulo"]
     del peliculas_database[clave]
-    return True, f"🗑️ {titulo} ha sido eliminada."
+    return True, f"{titulo} ha sido eliminada."
 
 def buscar_pelicula(nombre):
     return peliculas_database.get(nombre.lower(), None)
@@ -51,9 +51,9 @@ def obtener_todas_peliculas():
 def actualizar_pelicula(nombre, nuevos_datos):
     clave = nombre.lower()
     if clave not in peliculas_database:
-        return False, "❌ Película no encontrada."
+        return False, "Película no encontrada."
     peliculas_database[clave].update(nuevos_datos)
-    return True, f"✏️ Los datos de {peliculas_database[clave]['titulo']} se han actualizado."
+    return True, f"Los datos de {peliculas_database[clave]['titulo']} se han actualizado."
 
 def existe_pelicula(nombre):
     return nombre.lower() in peliculas_database
