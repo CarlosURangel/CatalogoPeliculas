@@ -1,130 +1,283 @@
-
-
-from typing import Dict, Any
-import sys
+"""
+INTERFAZ DE USUARIO Y MENUS - SISTEMA DE GESTION DE PELICULAS
+"""
 import database
-import validaciones as v
+import validaciones
 import config
 
-def _input_entero(mensaje: str) -> int:
-    valor = input(mensaje).strip()
-    try:
-        return int(valor)
-    except ValueError:
-        raise ValueError(config.mensaje_error["año_numero"])
 
-def _input_flotante(mensaje: str) -> float:
-    valor = input(mensaje).strip().replace(",", ".")
-    try:
-        return float(valor)
-    except ValueError:
-        raise ValueError(config.mensaje_error["rating_numero"])
+def limpiar_pantalla():
+    """Limpia la pantalla de la consola"""
+    print("\n" * 50)
 
-def pedir_datos_pelicula() -> Dict[str, Any]:
-    
-    titulo = v.validar_titulo(input("Título: "))
-    año = v.validar_año(_input_entero("Año (ejemplo: 2010): "))
-    genero = v.validar_genero(input("Género: "))
-    rating = v.validar_rating(_input_flotante("Rating (0-10): "))
-    director = v.validar_director(input("Director/a: "))
-    duracion = v.validar_duracion(_input_entero("Duración (min): "))
-    return {
-        "titulo": titulo,
-        "año": año,
-        "genero": genero,
-        "rating": rating,
-        "director": director,
-        "duracion": duracion,
-    }
 
-def mostrar_menu() -> None:
-    print("--------------------------------------------------------------------------")
-    print("CATÁLOGO DE PELÍCULAS")
-    print("--------------------------------------------------------------------------")
-    print("1) Listar todas")
-    print("2) Buscar por nombre (clave)")
-    print("3) Agregar")
-    print("4) Actualizar")
-    print("5) Eliminar")
-    print("0) Salir")
-    print("--------------------------------------------------------------------------")
+def mostrar_menu_principal():
+    """Muestra el menu principal"""
+    print("=" * 60)
+    print("SISTEMA DE GESTION DE PELICULAS")
+    print("=" * 60)
+    print("1. Agregar pelicula")
+    print("2. Eliminar pelicula")
+    print("3. Buscar pelicula")
+    print("4. Listar todas las peliculas")
+    print("5. Actualizar pelicula")
+    print("6. Ver generos disponibles")
+    print("7. Estadisticas")
+    print("8. Salir")
+    print("=" * 60)
 
-def pedir_opcion() -> str:
-    return input("Elige una opción: ").strip()
 
-def listar_todas() -> None:
+def mostrar_generos_peliculas():
+    """Muestra los generos de peliculas disponibles"""
+    print("\n" + "=" * 40)
+    print("GENEROS DE PELICULAS DISPONIBLES")
+    print("=" * 40)
+
+    for i, genero in enumerate(config.generos_peliculas, 1):
+        print(f"{i:2d}. {genero}", end="   ")
+        if i % 4 == 0:
+            print()
+    print(f"\n\nTotal: {len(config.generos_peliculas)} generos disponibles")
+
+
+def mostrar_estadisticas():
+    """Muestra estadisticas del catalogo de peliculas"""
+    total = database.total_peliculas()
     peliculas = database.obtener_todas_peliculas()
-    if not peliculas:
-        print("No hay películas registradas.")
-        return
-    print(f"Total: {database.total_peliculas()}")
-    for p in peliculas:
-        print(f"- {p['titulo']} ({p['año']}) || {p['genero']} || {p['rating']}/10 || {p['duracion']} min")
 
-def buscar_por_nombre() -> None:
-    nombre = input("Ingresa el nombre/clave (ej. matrix): ").strip()
-    peli = database.buscar_pelicula(nombre)
-    if not peli:
-        print("Película no encontrada.")
-        return
-    print("--------------------------------------------------------------------------")
-    print(f"Título:   {peli['titulo']}")
-    print(f"Año:      {peli['año']}")
-    print(f"Género:   {peli['genero']}")
-    print(f"Rating:   {peli['rating']}")
-    print(f"Director: {peli['director']}")
-    print(f"Duración: {peli['duracion']} min")
+    print("\n" + "=" * 40)
+    print("ESTADISTICAS DEL CATALOGO")
+    print("=" * 40)
 
-def agregar() -> None:
+    print(f"Total de peliculas: {total}")
+
+    # Contar peliculas por genero
+    generos_contador = {}
+    for pelicula in peliculas:
+        if "/" in pelicula['genero']:
+            for genero in pelicula['genero'].split("/"):
+                generos_contador[genero] = generos_contador.get(genero, 0) + 1
+        else:
+            generos_contador[pelicula['genero']] = generos_contador.get(pelicula['genero'], 0) + 1
+
+    print("\nPeliculas por genero:")
+    for genero, cantidad in sorted(generos_contador.items()):
+        print(f"  {genero}: {cantidad}")
+
+    # Calcular rating promedio
+    if total > 0:
+        rating_promedio = sum(p['rating'] for p in peliculas) / total
+        print(f"\nRating promedio: {rating_promedio:.2f}/10")
+
+    # Pelicula con mayor rating
+    if total > 0:
+        mejor_pelicula = max(peliculas, key=lambda x: x['rating'])
+        print(f"Mejor valorada: {mejor_pelicula['titulo']} ({mejor_pelicula['rating']}/10)")
+
+
+def solicitar_datos_pelicula():
+    """Solicita y valida los datos de una pelicula"""
+    datos = {}
+
     try:
-        datos = pedir_datos_pelicula()
-        clave = datos["titulo"].lower()
-        ok, msg = database.agregar_pelicula(clave, datos)
-        print(msg)
-    except ValueError as e:
-        print(f"Error de validación: {e}")
+        # Validar titulo
+        while True:
+            titulo = input("Titulo de la pelicula: ").strip()
+            valido, mensaje = validaciones.validar_titulo(titulo)
+            if valido:
+                datos['titulo'] = mensaje
+                break
+            print(f"ERROR: {mensaje}")
 
-def actualizar() -> None:
-    nombre = input("Clave de la película a actualizar (ej. matrix): ").strip().lower()
-    if not database.existe_pelicula(nombre):
-        print("Película no encontrada.")
-        return
-    print("Deja en blanco para mantener el valor actual.")
-    actual = database.buscar_pelicula(nombre)
-    try:
-        
-        nuevo_titulo = input(f"Título [{actual['titulo']}]: ").strip()
-        if nuevo_titulo:
-            actual["titulo"] = v.validar_titulo(nuevo_titulo)
+        # Validar año
+        while True:
+            año = input("Año de estreno: ").strip()
+            valido, mensaje = validaciones.validar_año(año)
+            if valido:
+                datos['año'] = mensaje
+                break
+            print(f"ERROR: {mensaje}")
 
-        año_txt = input(f"Año [{actual['año']}]: ").strip()
-        if año_txt:
-            actual["año"] = v.validar_año(int(año_txt))
+        # Validar genero
+        while True:
+            print(f"\nGeneros disponibles: {', '.join(config.generos_peliculas)}")
+            genero = input("Genero (ej: Drama o Drama/Thriller): ").strip()
+            valido, mensaje = validaciones.validar_genero(genero)
+            if valido:
+                datos['genero'] = mensaje
+                break
+            print(f"ERROR: {mensaje}")
 
-        genero_txt = input(f"Género [{actual['genero']}]: ").strip()
-        if genero_txt:
-            actual["genero"] = v.validar_genero(genero_txt)
+        # Validar rating
+        while True:
+            rating = input("Rating (0.0-10.0): ").strip()
+            valido, mensaje = validaciones.validar_rating(rating)
+            if valido:
+                datos['rating'] = mensaje
+                break
+            print(f"ERROR: {mensaje}")
 
-        rating_txt = input(f"Rating [{actual['rating']}]: ").strip().replace(",", ".")
-        if rating_txt:
-            actual["rating"] = v.validar_rating(float(rating_txt))
+        # Validar director
+        while True:
+            director = input("Director: ").strip()
+            valido, mensaje = validaciones.validar_director(director)
+            if valido:
+                datos['director'] = mensaje
+                break
+            print(f"ERROR: {mensaje}")
 
-        director_txt = input(f"Director/a [{actual['director']}]: ").strip()
-        if director_txt:
-            actual["director"] = v.validar_director(director_txt)
+        # Validar duracion
+        while True:
+            duracion = input("Duracion en minutos: ").strip()
+            valido, mensaje = validaciones.validar_duracion(duracion)
+            if valido:
+                datos['duracion'] = mensaje
+                break
+            print(f"ERROR: {mensaje}")
 
-        duracion_txt = input(f"Duración [{actual['duracion']}]: ").strip()
-        if duracion_txt:
-            actual["duracion"] = v.validar_duracion(int(duracion_txt))
+        return True, datos
 
-        ok, msg = database.actualizar_pelicula(nombre, actual)
-        print(msg)
-    except ValueError as e:
-        print(f"Error de validación: {e}")
+    except KeyboardInterrupt:
+        return False, "Operacion cancelada por el usuario"
     except Exception as e:
-        print(f"Ocurrió un error inesperado: {e}")
+        return False, f"Error inesperado: {e}"
 
-def eliminar() -> None:
-    nombre = input("Clave de la película a eliminar (ej. matrix): ").strip()
-    ok, msg = database.eliminar_pelicula(nombre)
-    print(msg)
+
+def menu_agregar_pelicula():
+    """Menu para agregar pelicula"""
+    print("\n" + "=" * 40)
+    print("AGREGAR NUEVA PELICULA")
+    print("=" * 40)
+
+    exito, resultado = solicitar_datos_pelicula()
+    if not exito:
+        print(f"ERROR: {resultado}")
+        return
+
+    datos = resultado
+    clave = datos['titulo'].lower()
+    exito, mensaje = database.agregar_pelicula(clave, datos)
+    print(f"\n{mensaje}")
+
+
+def menu_eliminar_pelicula():
+    """Menu para eliminar pelicula"""
+    print("\n" + "=" * 40)
+    print("ELIMINAR PELICULA")
+    print("=" * 40)
+
+    titulo = input("Titulo de la pelicula a eliminar: ").strip()
+
+    if not database.existe_pelicula(titulo):
+        print("ERROR: Pelicula no encontrada")
+        return
+
+    pelicula = database.buscar_pelicula(titulo)
+    print(f"\nInformacion de la pelicula:")
+    print(f"   Titulo: {pelicula['titulo']}")
+    print(f"   Año: {pelicula['año']}")
+    print(f"   Director: {pelicula['director']}")
+
+    confirmacion = input("\n¿Esta seguro de eliminar esta pelicula? (s/n): ").lower().strip()
+    if confirmacion in ['s', 'si', 'sí']:
+        exito, mensaje = database.eliminar_pelicula(titulo)
+        print(mensaje)
+    else:
+        print("Eliminacion cancelada")
+
+
+def menu_buscar_pelicula():
+    """Menu para buscar pelicula"""
+    print("\n" + "=" * 40)
+    print("BUSCAR PELICULA")
+    print("=" * 40)
+
+    titulo = input("Titulo de la pelicula: ").strip()
+    pelicula = database.buscar_pelicula(titulo)
+
+    if not pelicula:
+        print("ERROR: Pelicula no encontrada")
+        return
+
+    print(f"\nINFORMACION DE '{pelicula['titulo'].upper()}'")
+    print("=" * 40)
+    print(f"Titulo: {pelicula['titulo']}")
+    print(f"Año: {pelicula['año']}")
+    print(f"Genero: {pelicula['genero']}")
+    print(f"Rating: {pelicula['rating']}/10")
+    print(f"Director: {pelicula['director']}")
+    print(f"Duracion: {pelicula['duracion']} minutos")
+
+
+def menu_listar_peliculas():
+    """Menu para listar peliculas"""
+    print("\n" + "=" * 40)
+    print("LISTA DE PELICULAS")
+    print("=" * 40)
+
+    peliculas = database.obtener_todas_peliculas()
+
+    if not peliculas:
+        print("No hay peliculas en el catalogo")
+        return
+
+    for i, pelicula in enumerate(peliculas, 1):
+        print(f"\n{i}. {pelicula['titulo']} ({pelicula['año']})")
+        print(f"   Genero: {pelicula['genero']}")
+        print(f"   Rating: {pelicula['rating']}/10")
+        print(f"   Director: {pelicula['director']}")
+        print(f"   Duracion: {pelicula['duracion']} min")
+
+    print(f"\nTotal: {len(peliculas)} peliculas")
+
+
+def menu_actualizar_pelicula():
+    """Menu para actualizar pelicula"""
+    print("\n" + "=" * 40)
+    print("ACTUALIZAR PELICULA")
+    print("=" * 40)
+
+    titulo = input("Titulo de la pelicula a actualizar: ").strip()
+
+    if not database.existe_pelicula(titulo):
+        print("ERROR: Pelicula no encontrada")
+        return
+
+    pelicula = database.buscar_pelicula(titulo)
+    print(f"\nEditando: {pelicula['titulo']}")
+
+    print("\nValores actuales:")
+    campos = [
+        ("año", "Año", str(pelicula['año']), validaciones.validar_año),
+        ("genero", "Genero", pelicula['genero'], validaciones.validar_genero),
+        ("rating", "Rating", str(pelicula['rating']), validaciones.validar_rating),
+        ("director", "Director", pelicula['director'], validaciones.validar_director),
+        ("duracion", "Duracion", str(pelicula['duracion']), validaciones.validar_duracion)
+    ]
+
+    for i, (clave, nombre_campo, valor_actual, validador) in enumerate(campos, 1):
+        print(f"{i}. {nombre_campo}: {valor_actual}")
+
+    try:
+        opcion = int(input("\n¿Que campo desea actualizar? (1-5): "))
+        if opcion < 1 or opcion > 5:
+            print("ERROR: Opcion no valida")
+            return
+
+        clave, nombre_campo, valor_actual, validador = campos[opcion - 1]
+        nuevo_valor = input(f"Nuevo valor para {nombre_campo} ({valor_actual}): ").strip()
+
+        if nuevo_valor:
+            valido, resultado = validador(nuevo_valor)
+            if valido:
+                exito, mensaje = database.actualizar_pelicula(titulo, {clave: resultado})
+                print(mensaje)
+            else:
+                print(f"ERROR: {resultado}")
+        else:
+            print("No se realizaron cambios")
+
+    except ValueError:
+        print("ERROR: Ingrese un numero valido")
+    except Exception as e:
+        print(f"ERROR: {e}")
