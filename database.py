@@ -1,30 +1,31 @@
 # Base de datos
 peliculas_database = {
-    "matrix": {
-        "titulo": "Matrix",
-        "año": 1999,
-        "genero": "Ciencia Ficción",
-        "rating": 9.0,
-        "director": "Lana y Lilly Wachowski",
-        "duracion": 136
+    "lost in translation": {
+        "titulo": "Lost in Translation",
+        "año": 2003,
+        "genero": "Drama/Romance",
+        "rating": 7.7,
+        "director": "Sofia Coppola",
+        "duracion": 102
     },
-    "inception": {
-        "titulo": "Inception",
-        "año": 2010,
-        "genero": "Acción/Ciencia Ficción",
-        "rating": 8.8,
-        "director": "Christopher Nolan",
-        "duracion": 148
+    "rocky": {
+        "titulo": "Rocky",
+        "año": 1976,
+        "genero": "Deporte",
+        "rating": 8.1,
+        "director": "John G. Avildsen",
+        "duracion": 120
     },
-    "parasite": {
-        "titulo": "Parasite",
-        "año": 2019,
-        "genero": "Drama/Thriller",
-        "rating": 8.6,
-        "director": "Bong Joon-ho",
-        "duracion": 132
+    "reyes de las olas": {
+        "titulo": "Reyes de las Olas",
+        "año": 2007,
+        "genero": "Animación/Comedia",
+        "rating": 6.7,
+        "director": "Ash Brannon",
+        "duracion": 85
     },
 }
+
 
 # CRUD
 # Agregar pelicula 

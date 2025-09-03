@@ -1,12 +1,9 @@
-"""
-PROGRAMA PRINCIPAL - SISTEMA DE GESTIÓN DE PELÍCULAS
-"""
+# PRograma Catalogo de peliculas
 import interfaz
 
 
 def main():
-    """Función principal del programa"""
-    print("Bienvenido al Sistema de Gestion de Peliculas")
+    print("Catalogo de peliculas")
 
     while True:
         try:
@@ -28,7 +25,7 @@ def main():
             elif opcion == "7":
                 interfaz.mostrar_estadisticas()
             elif opcion == "8":
-                print("\nGracias por usar el Sistema de Gestion de Peliculas. Hasta pronto!")
+                print("\nCerrando...")
                 break
             else:
                 print("Opcion no valida. Por favor, elija 1-8.")
@@ -37,7 +34,7 @@ def main():
             interfaz.limpiar_pantalla()
 
         except KeyboardInterrupt:
-            print("\n\nPrograma interrumpido por el usuario. Hasta pronto!")
+            print("\n\nPrograma interrumpido por el usuario.")
             break
         except Exception as e:
             print(f"Error inesperado: {e}")

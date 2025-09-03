@@ -1,25 +1,23 @@
-"""
-INTERFAZ DE USUARIO Y MENUS - SISTEMA DE GESTION DE PELICULAS
-"""
+
+# INTERFAZ DE USUARIO
+
 import database
 import validaciones
 import config
 
 
 def limpiar_pantalla():
-    """Limpia la pantalla de la consola"""
-    print("\n" * 50)
+    print("\n" * 30)
 
 
 def mostrar_menu_principal():
-    """Muestra el menu principal"""
     print("=" * 60)
-    print("SISTEMA DE GESTION DE PELICULAS")
+    print("CATALOGO DE PELICULAS")
     print("=" * 60)
     print("1. Agregar pelicula")
     print("2. Eliminar pelicula")
     print("3. Buscar pelicula")
-    print("4. Listar todas las peliculas")
+    print("4. Ver todas las peliculas")
     print("5. Actualizar pelicula")
     print("6. Ver generos disponibles")
     print("7. Estadisticas")
@@ -28,7 +26,6 @@ def mostrar_menu_principal():
 
 
 def mostrar_generos_peliculas():
-    """Muestra los generos de peliculas disponibles"""
     print("\n" + "=" * 40)
     print("GENEROS DE PELICULAS DISPONIBLES")
     print("=" * 40)
@@ -64,11 +61,6 @@ def mostrar_estadisticas():
     for genero, cantidad in sorted(generos_contador.items()):
         print(f"  {genero}: {cantidad}")
 
-    # Calcular rating promedio
-    if total > 0:
-        rating_promedio = sum(p['rating'] for p in peliculas) / total
-        print(f"\nRating promedio: {rating_promedio:.2f}/10")
-
     # Pelicula con mayor rating
     if total > 0:
         mejor_pelicula = max(peliculas, key=lambda x: x['rating'])
@@ -76,7 +68,6 @@ def mostrar_estadisticas():
 
 
 def solicitar_datos_pelicula():
-    """Solicita y valida los datos de una pelicula"""
     datos = {}
 
     try:
@@ -101,7 +92,7 @@ def solicitar_datos_pelicula():
         # Validar genero
         while True:
             print(f"\nGeneros disponibles: {', '.join(config.generos_peliculas)}")
-            genero = input("Genero (ej: Drama o Drama/Thriller): ").strip()
+            genero = input("Genero (ejemplo: Acción o Drama/Romance): ").strip()
             valido, mensaje = validaciones.validar_genero(genero)
             if valido:
                 datos['genero'] = mensaje
@@ -161,7 +152,6 @@ def menu_agregar_pelicula():
 
 
 def menu_eliminar_pelicula():
-    """Menu para eliminar pelicula"""
     print("\n" + "=" * 40)
     print("ELIMINAR PELICULA")
     print("=" * 40)
@@ -187,7 +177,6 @@ def menu_eliminar_pelicula():
 
 
 def menu_buscar_pelicula():
-    """Menu para buscar pelicula"""
     print("\n" + "=" * 40)
     print("BUSCAR PELICULA")
     print("=" * 40)
@@ -210,7 +199,6 @@ def menu_buscar_pelicula():
 
 
 def menu_listar_peliculas():
-    """Menu para listar peliculas"""
     print("\n" + "=" * 40)
     print("LISTA DE PELICULAS")
     print("=" * 40)
@@ -232,7 +220,6 @@ def menu_listar_peliculas():
 
 
 def menu_actualizar_pelicula():
-    """Menu para actualizar pelicula"""
     print("\n" + "=" * 40)
     print("ACTUALIZAR PELICULA")
     print("=" * 40)
@@ -261,7 +248,7 @@ def menu_actualizar_pelicula():
     try:
         opcion = int(input("\n¿Que campo desea actualizar? (1-5): "))
         if opcion < 1 or opcion > 5:
-            print("ERROR: Opcion no valida")
+            print("Opcion no valida")
             return
 
         clave, nombre_campo, valor_actual, validador = campos[opcion - 1]

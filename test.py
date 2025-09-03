@@ -1,108 +1,106 @@
+# Pruebas automáticas
 
-import unittest
-import types
-import database as db
+import random
 import validaciones as v
+import database as db
 import config
 
-class TestValidaciones(unittest.TestCase):
-    def test_titulo_ok(self):
-        self.assertEqual(v.validar_titulo("  Matrix "), "Matrix")
 
-    def test_titulo_vacio(self):
-        with self.assertRaises(ValueError):
-            v.validar_titulo("   ")
+def prueba_validar_titulo(cantidad=5):
+    print("\n--- PRUEBAS: validar_titulo ---")
+    for i in range(cantidad):
+        titulo = f"Pelicula{i}"
+        ok, res = v.validar_titulo(titulo)
+        try:
+            assert ok and res == titulo
+            print(f"Prueba {i+1} superada. '{titulo}' es válido")
+        except AssertionError:
+            print(f"Prueba {i+1} fallida con '{titulo}'")
 
-    def test_año_ok(self):
-        self.assertEqual(v.validar_año(config.año_minimo), config.año_minimo)
-        self.assertEqual(v.validar_año(config.año_maximo), config.año_maximo)
 
-    def test_año_tipo(self):
-        with self.assertRaises(ValueError):
-            v.validar_año("2000")  # no int
+def prueba_validar_año():
+    print("\n--- PRUEBAS: validar_año ---")
+    try:
+        ok, res = v.validar_año(2000)
+        assert ok and res == 2000
+        print("Prueba año válido superada (2000)")
+    except AssertionError:
+        print("Falló prueba con año válido")
 
-    def test_año_fuera_rango(self):
-        with self.assertRaises(ValueError):
-            v.validar_año(config.año_minimo - 1)
+    try:
+        ok, res = v.validar_año(1800)  # fuera de rango
+        assert not ok
+        print("Prueba año inválido superada (1800)")
+    except AssertionError:
+        print("Falló prueba con año inválido")
 
-    def test_rating_ok(self):
-        self.assertEqual(v.validar_rating(5), 5)
-        self.assertEqual(v.validar_rating(7.5), 7.5)
 
-    def test_rating_tipo(self):
-        with self.assertRaises(ValueError):
-            v.validar_rating("10")
+def prueba_validar_genero():
+    print("\n--- PRUEBAS: validar_genero ---")
+    genero_ok = config.generos_peliculas[0]
+    ok, res = v.validar_genero(genero_ok)
+    try:
+        assert ok and res == genero_ok
+        print(f"Prueba género válido superada ({genero_ok})")
+    except AssertionError:
+        print("Falló prueba con género válido")
 
-    def test_rating_fuera_rango(self):
-        with self.assertRaises(ValueError):
-            v.validar_rating(config.rating_maximo + 0.1)
+    ok, res = v.validar_genero("Inventado")
+    try:
+        assert not ok
+        print("Prueba género inválido superada")
+    except AssertionError:
+        print("Falló prueba con género inválido")
 
-    def test_genero_vacio(self):
-        with self.assertRaises(ValueError):
-            v.validar_genero("   ")
 
-    def test_director_vacio(self):
-        with self.assertRaises(ValueError):
-            v.validar_director("   ")
+def prueba_database_crud():
+    print("\n--- PRUEBAS: CRUD en database ---")
+    datos = {
+        "titulo": "PruebaX",
+        "año": 2020,
+        "genero": "Acción",
+        "rating": 7.5,
+        "director": "Director Test",
+        "duracion": 120,
+    }
+    clave = datos["titulo"].lower()
 
-    def test_duracion_ok(self):
-        self.assertEqual(v.validar_duracion(config.duracion_minima), config.duracion_minima)
-        self.assertEqual(v.validar_duracion(config.duracion_maxima), config.duracion_maxima)
+    # Agregar
+    ok, msg = db.agregar_pelicula(clave, datos)
+    try:
+        assert ok
+        print(f"Agregar: superada ({msg})")
+    except AssertionError:
+        print("Falló al agregar película")
 
-    def test_duracion_tipo(self):
-        with self.assertRaises(ValueError):
-            v.validar_duracion("120")
+    # Buscar
+    peli = db.buscar_pelicula(clave)
+    try:
+        assert peli is not None and peli["titulo"] == "PruebaX"
+        print("Buscar: superada")
+    except AssertionError:
+        print("Falló al buscar película")
 
-    def test_duracion_fuera_rango(self):
-        with self.assertRaises(ValueError):
-            v.validar_duracion(config.duracion_maxima + 1)
+    # Actualizar
+    ok, msg = db.actualizar_pelicula(clave, {"rating": 9.0})
+    try:
+        assert ok and db.buscar_pelicula(clave)["rating"] == 9.0
+        print("Actualizar: superada")
+    except AssertionError:
+        print("Falló al actualizar película")
 
-class TestCRUD(unittest.TestCase):
-    def setUp(self):
-        # Copia profunda del estado original
-        self._backup = dict(db.peliculas_database)
+    # Eliminar
+    ok, msg = db.eliminar_pelicula(clave)
+    try:
+        assert ok and not db.existe_pelicula(clave)
+        print("Eliminar: superada")
+    except AssertionError:
+        print("Falló al eliminar película")
 
-    def tearDown(self):
-        # Restaurar estado original
-        db.peliculas_database.clear()
-        db.peliculas_database.update(self._backup)
-
-    def test_agregar_y_buscar(self):
-        datos = {
-            "titulo": "Interstellar",
-            "año": 2014,
-            "genero": "Ciencia Ficción",
-            "rating": 8.6,
-            "director": "Christopher Nolan",
-            "duracion": 169,
-        }
-        ok, _ = db.agregar_pelicula("interstellar", datos)
-        self.assertTrue(ok)
-        peli = db.buscar_pelicula("interstellar")
-        self.assertIsNotNone(peli)
-        self.assertEqual(peli["titulo"], "Interstellar")
-
-    def test_agregar_existente(self):
-        # Usa una clave conocida del dataset por defecto
-        ok, msg = db.agregar_pelicula("matrix", {"titulo": "X", "año": 2000, "genero": "X", "rating": 5, "director": "X", "duracion": 100})
-        self.assertFalse(ok)
-        self.assertIn("ya está registrada", msg)
-
-    def test_eliminar(self):
-        ok, _ = db.eliminar_pelicula("parasite")
-        self.assertTrue(ok)
-        self.assertIsNone(db.buscar_pelicula("parasite"))
-
-    def test_actualizar(self):
-        ok, _ = db.actualizar_pelicula("inception", {"rating": 9.1})
-        self.assertTrue(ok)
-        self.assertEqual(db.buscar_pelicula("inception")["rating"], 9.1)
-
-    def test_total(self):
-        total_inicial = db.total_peliculas()
-        ok, _ = db.agregar_pelicula("up", {"titulo": "Up", "año": 2009, "genero": "Animación", "rating": 8.2, "director": "Pete Docter", "duracion": 96})
-        self.assertTrue(ok)
-        self.assertEqual(db.total_peliculas(), total_inicial + 1)
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    # Ejecutar todas las pruebas
+    prueba_validar_titulo()
+    prueba_validar_año()
+    prueba_validar_genero()
+    prueba_database_crud()

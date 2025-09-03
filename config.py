@@ -4,7 +4,7 @@ año_maximo = 2025
 rating_minimo = 0.0
 rating_maximo = 10.0
 longitud_min_director = 1
-longitud_max_director = 400
+longitud_max_director = 300
 duracion_minima = 1
 duracion_maxima = 400
 
